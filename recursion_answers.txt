@@ -139,13 +139,20 @@ especially with larger numbers given its time complexity is O(n).
 where the number of dimensions is unknown, write a recursive 
 algorithm to count the number of items in the entire collection.
 
-function arrayLength(array) {
-    if (!("0" in array)) {
-        return 0;
+var elementCount = 0;
+
+function countArrayElements (array) {
+  if (!Array.isArray(array)) {
+    elementCount ++;
+  }
+  for (let i = 0; i < array.length; i++) {
+    countArrayElements(array[i]);
     }
-    return arrayLength(array.slice(0, -1)) + 1; 
+	return elementCount;
 }
 
+var multiDimensionalArray = [[10,9,8,[7,6,5,[4,3,2],1]],[2,9,4],[7, [5, 2, 9], [8, 9],[[10, 11, 12],[13, 14, 15], 16]]];
+countArrayElements(multiDimensionalArray);
 
 6. A palindrome is a word or phrase whose spelling is the same 
 either direction (e.g., racecar). Write a recursive algorithm 
