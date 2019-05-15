@@ -163,158 +163,102 @@ a function that finds the distance between the two nodes.
 Example: The distance between the nodes 4 and 10 is 4. The 
 distance between the nodes 8 and 10 is 1. The distance between 
 the nodes 1 and 14 is 4.
+A. For this problem I had to make the heuristic assumption that the distance between two given nodes will, OFTEN ENOUGH, be equal the distance from root to node1 PLUS the distance between root and node2 MINUS TWICE (once for each node) the distance from root to the Lowest Common Ancestor of node1 and node2.
+//begin code
+class Node {
+	constructor(data) {
+		this.data = data;
+		this.left = null;
+		this.right = null;
+	}
+}
 
-FUNCTION findDistance (root, n1, n2)
-  Lowest Common Ancestor = lowestCommonAncestor(root, n1, n2)
-    d1 = levelsOfNode(lowestCommonAncestor, n2, 0) //find the distance from the lowestCommonAncestor to n1
-    d2 = levelsOfNode(lowestCommonAncestor, n2, 0) //find the distance from the lowestCommonAncestor to n1
-    return d1 + d2
+class BinarySearchTree {
+	constructor() {
+		this.root = null;
+	}
 
-    class Node {
-      constructor(data, left = null, right = null) {
-        this.data = data;
-        this.left = left;
-        this.right = right;
-      }
-    }
+	findDistanceBetweenTwoNodes(root, n1, n2) {
+		var lowestCommonAncestor = this.findCommonAncestor(root, n1, n2);
+		var distanceNode1ToRoot = this.countAncestors(lowestCommonAncestor, n1);
+		var distanceNode2ToRoot = this.countAncestors(lowestCommonAncestor, n2);
+		var distanceRootToAncestor = this.countAncestors(root, lowestCommonAncestor);
+		var totalDistance = (distanceNode1ToRoot + distanceNode2ToRoot) - (2 * distanceRootToAncestor);
+		return ('The distance between node ' + n1 + ' and node ' + n2 + ' is ' + totalDistance);
+	}
 
-    class BST {
-      constructor() {
-        this.root = null;
-      }
-      add(data) {
-        const node = this.root;
-        if (node === null) {
-          this.root = new Node(data);
-          return;
-        } else {
-          const searchTree = function(node) {
-            if (data < node.data) {
-              if (node.left === null) {
-                node.left = new Node(data);
-                return;
-              } else if (node.left !== null) {
-                return searchTree(node.left);
-              }
-            } else if (data > node.data) {
-              if (node.right === null) {
-                node.right = new Node(data);
-                return;
-              } else if (node.right !== null) {
-                return searchTree(node.right);
-              }
-            } else {
-              return null;
-            }
-          };
-          return searchTree(node);
-        }
-      }
-      isPresent(data) {
-        let current = this.root;
-        while (current) {
-          if (data === current.data) {
-            return true;
-          }
-          if (data < current.data) {
-            current = current.left;
-          } else {
-            current = current.right;
-          }
-        }
-        return false;
-      }
+	findCommonAncestor(root, n1, n2) {
+		if (!root) return;
+		var lowestCommonAncestor = root.data;
+		if (n1 === lowestCommonAncestor || n2 === lowestCommonAncestor) {
+			return lowestCommonAncestor;
+		}
+		if (n1 < lowestCommonAncestor && n2 < lowestCommonAncestor) {
+			return this.findCommonAncestor(root.left, n1, n2);
+		}
+		if (n1 > lowestCommonAncestor && n2 > lowestCommonAncestor) {
+			return this.findCommonAncestor(root.right, n1, n2);
+		}
+		return lowestCommonAncestor;
+	}
 
-      findLCA(root, n1, n2) {
-    	 if(!root) return;
-       var val = root.data;
-       if(n1 < val && n2 < val){
-         return   this.findLCA(root.left, n1, n2);
-       }
-       if(n1 > val && n2 > val){
-         return   this.findLCA(root.right, n1, n2);
-       }
-      return root;
-    }
+	countAncestors(root, data) {
+		let thisNode = this.root;
+		let nodeCount = 0;
+		while (thisNode) {
+			if (data === thisNode.data) {
+				return nodeCount;
+			}
+			thisNode = data < thisNode.data ? thisNode.left : thisNode.right;
+			nodeCount++;
+		}
+	}
 
+	getRootNode() {
+		return this.root;
+	}
 
-       findLevel(root, key, level=0){
+	insert(data) {
+		var newNode = new Node(data);
+		if (this.root === null) {
+			this.root = newNode;
+			this.length++;
+		} else {
+			this.insertNode(this.root, newNode);
+		}
+	}
 
-        if (root === null) {
-        return -1;
-        }
-        if (root.data === key){
-        return level;
-        }
-        let l = this.findLevel(root.left, key, level+1);
-        if (l != -1){
-        return l;
-        }  else {
-          return this.findLevel(root.right, key, level+1)
-        }
-       }
+	insertNode(node, newNode) {
+		if (newNode.data < node.data) {
+			if (node.left === null) {
+				node.left = newNode;
+				this.length++;
+			} else {
+				this.insertNode(node.left, newNode);
+			}
+		} else {
+			if (node.right === null) {
+				node.right = newNode;
+				this.length++;
+			} else {
+				this.insertNode(node.right, newNode);
+			}
+		}
+	}
+}
 
-     findDistance(n1, n2) {
-      let current = this.root;
-      let commonAncestor = bst.findLCA(current, n1, n2);
+var BST = new BinarySearchTree();
 
-      if(!commonAncestor) {
-        return -1;
-      }
+BST.insert(8);
+BST.insert(10);
+BST.insert(3);
+BST.insert(14);
+BST.insert(6);
+BST.insert(1);
+BST.insert(13);
+BST.insert(7);
+BST.insert(4);
 
-       let level1 = bst.findLevel(commonAncestor, n1);
-       let level2 = bst.findLevel(commonAncestor, n2);
-      if( level1 == -1 ) {
-        return -1;
-      }
-      if( level2 == -1 ) {
-        return -1;
-      }
-      return level1 + level2;
-    }
-
-
-    printByLevel() {
-      if(!this.root) {
-        return console.log('No root node found');
-      }
-      var newline = new Node('\n');
-      var queue = [this.root, newline];
-      var string = '';
-      while(queue.length) {
-        var node = queue.shift();
-        string += node.data.toString() + (node.data !== '\n' ? ' ' : '');
-        if(node === newline && queue.length) {
-          queue.push(newline);
-        }
-        if(node.left) {
-          queue.push(node.left);
-        }
-        if(node.right) {
-          queue.push(node.right);
-        }
-      }
-      console.log(string.trim());
-    };
-
-
-    }
-
-    let bst = new BST();
-
-    bst.add(8);
-    bst.add(3);
-    bst.add(10);
-    bst.add(1);
-    bst.add(6);
-    bst.add(14);
-    bst.add(4);
-    bst.add(7);
-    bst.add(13);
-
-
-
-    console.log(bst.findDistance(1, 7)); // prints 3
-    console.log(bst.findDistance(1, 6)); // prints 1
-    console.log(bst.findDistance(14, 13)); // prints 1
-    console.log(bst.findDistance(4, 13)); //prints 6
+var root = BST.getRootNode();
+BST.findDistanceBetweenTwoNodes(root, 4, 10); //'The distance between node 4 and node 10 is 4'
+//end code
